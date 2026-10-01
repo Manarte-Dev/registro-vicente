@@ -13,9 +13,32 @@
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
-  <div id="app">
+  <!-- Tela: Login -->
+  <section id="screen-login" class="screen screen-login active">
+    <div class="login-panel">
+      <div class="login-brand">
+        <img src="icon-192.png" alt="" class="login-logo" width="72" height="72">
+        <h1>Registro Igreja</h1>
+        <p>Entre com seu e-mail e senha para acessar os cadastros.</p>
+      </div>
+      <form id="login-form" class="login-form">
+        <div class="form-group">
+          <label for="input-login-email">E-mail</label>
+          <input type="email" id="input-login-email" required autocomplete="email" placeholder="seu@email.com">
+        </div>
+        <div class="form-group">
+          <label for="input-login-password">Senha</label>
+          <input type="password" id="input-login-password" required autocomplete="current-password" placeholder="Sua senha">
+        </div>
+        <p id="login-error" class="field-error hidden"></p>
+        <button type="submit" id="btn-login" class="btn btn-primary btn-block">Entrar</button>
+      </form>
+    </div>
+  </section>
+
+  <div id="app" class="hidden">
     <!-- Tela: Lista -->
-    <section id="screen-list" class="screen active">
+    <section id="screen-list" class="screen">
       <header class="header">
         <h1>Registro Igreja</h1>
         <button type="button" id="btn-menu" class="btn-icon" aria-label="Menu">☰</button>
@@ -24,6 +47,7 @@
       <div id="menu-panel" class="menu-panel hidden">
         <button type="button" id="btn-export" class="menu-item">Exportar backup</button>
         <button type="button" id="btn-import" class="menu-item">Importar backup</button>
+        <button type="button" id="btn-logout" class="menu-item menu-item-danger">Sair</button>
         <input type="file" id="input-import" accept=".json,application/json" hidden>
       </div>
 

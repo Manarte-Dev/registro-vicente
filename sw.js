@@ -1,12 +1,14 @@
-const CACHE_NAME = 'registro-igreja-v4';
+const CACHE_NAME = 'registro-igreja-v5';
 const ASSETS = [
   './',
   './index.html',
   './css/styles.css',
   './js/app.js',
+  './js/auth.js',
   './js/db.js',
   './js/export.js',
   './js/ficha.js',
+  './js/firebase.js',
   './manifest.json',
   './icon-192.png',
 ];

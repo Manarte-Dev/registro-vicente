@@ -6,6 +6,7 @@ import {
   deleteMember,
   compressImage,
 } from './db.js';
+import { login, logout, watchAuth, authErrorMessage } from './auth.js';
 import { exportBackup, importBackup } from './export.js';
 import {
   updateFichaFromInputs,
@@ -13,6 +14,12 @@ import {
   clearFichaFields,
   baixarFicha,
 } from './ficha.js';
+
+const screenLogin = document.getElementById('screen-login');
+const appContainer = document.getElementById('app');
+const loginForm = document.getElementById('login-form');
+const loginError = document.getElementById('login-error');
+const btnLogin = document.getElementById('btn-login');
 
 const screens = {
   list: document.getElementById('screen-list'),
@@ -51,6 +58,21 @@ function showScreen(name) {
   Object.values(screens).forEach((s) => s.classList.remove('active'));
   screens[name].classList.add('active');
   menuPanel.classList.add('hidden');
+}
+
+function showLogin() {
+  screenLogin.classList.add('active');
+  appContainer.classList.add('hidden');
+  allMembers = [];
+  membersList.innerHTML = '';
+  loginError.classList.add('hidden');
+  loginError.textContent = '';
+}
+
+function showApp() {
+  screenLogin.classList.remove('active');
+  appContainer.classList.remove('hidden');
+  showScreen('list');
 }
 
 function showToast(message) {
@@ -353,6 +375,36 @@ document.getElementById('btn-menu').addEventListener('click', () => {
   menuPanel.classList.toggle('hidden');
 });
 
+document.getElementById('btn-logout').addEventListener('click', async () => {
+  menuPanel.classList.add('hidden');
+  try {
+    await logout();
+    showToast('Sessão encerrada.');
+  } catch {
+    showToast('Erro ao sair.');
+  }
+});
+
+loginForm.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  loginError.classList.add('hidden');
+  btnLogin.disabled = true;
+  btnLogin.textContent = 'Entrando...';
+
+  const email = document.getElementById('input-login-email').value;
+  const password = document.getElementById('input-login-password').value;
+
+  try {
+    await login(email, password);
+  } catch (err) {
+    loginError.textContent = authErrorMessage(err.code);
+    loginError.classList.remove('hidden');
+  } finally {
+    btnLogin.disabled = false;
+    btnLogin.textContent = 'Entrar';
+  }
+});
+
 document.getElementById('btn-export').addEventListener('click', async () => {
   menuPanel.classList.add('hidden');
   try {
@@ -407,8 +459,17 @@ formInputs.forEach((input) => {
   input.addEventListener('change', syncFormFicha);
 });
 
-loadMembers().catch(() => {
-  showToast('Erro ao carregar dados. Verifique se o navegador suporta armazenamento local.');
+watchAuth(async (user) => {
+  if (user) {
+    showApp();
+    try {
+      await loadMembers();
+    } catch {
+      showToast('Erro ao carregar cadastros. Verifique a conexão.');
+    }
+  } else {
+    showLogin();
+  }
 });
 
 if ('serviceWorker' in navigator) {

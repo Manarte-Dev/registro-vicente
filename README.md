@@ -2,7 +2,7 @@
 
 Aplicação web para cadastrar membros da igreja com **foto** e **dados pessoais**, pensada para uso no **celular**.
 
-Os dados ficam guardados **localmente no navegador** (IndexedDB) — não há servidor nem banco na nuvem.
+Os dados ficam guardados na **nuvem (Firebase)** com **login por e-mail e senha**. Várias pessoas podem acessar os mesmos cadastros.
 
 ## Funcionalidades
 
@@ -49,15 +49,16 @@ Substitua `SEU_USUARIO` pelo seu usuário do GitHub.
 1. Abra o link no navegador do celular (Chrome ou Safari)
 2. Opcional: **Adicionar à tela inicial** para abrir como app
 
+## Login e acesso
+
+- Ao abrir o site, faça login com o **e-mail e senha** cadastrados no Firebase Authentication
+- Use **Sair** no menu (☰) para encerrar a sessão
+- No Firebase Console, adicione `manarte-dev.github.io` em **Authentication → Settings → Authorized domains** se o login no GitHub Pages falhar
+
 ## Backup dos dados
 
-Como os dados ficam só no navegador:
-
-- Use **Exportar backup** (menu ☰) com frequência
-- Guarde o arquivo `.json` em local seguro (Google Drive, e-mail, etc.)
-- Para restaurar, use **Importar backup**
-
-> **Atenção:** limpar dados/cache do navegador apaga todos os cadastros se não houver backup.
+- Use **Exportar backup** (menu ☰) para baixar um arquivo `.json`
+- Para restaurar, use **Importar backup** (substitui todos os cadastros na nuvem)
 
 ## Testar localmente
 

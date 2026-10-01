@@ -567,3 +567,59 @@ body {
 .hidden {
   display: none !important;
 }
+
+.screen-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  min-height: 100dvh;
+  background: var(--color-bg);
+}
+
+.screen-login.active {
+  display: flex;
+}
+
+.login-panel {
+  width: 100%;
+  max-width: 400px;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  padding: 28px 24px;
+}
+
+.login-brand {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.login-logo {
+  border-radius: 16px;
+  margin-bottom: 12px;
+}
+
+.login-brand h1 {
+  font-size: 1.25rem;
+  color: var(--color-primary);
+  margin-bottom: 8px;
+}
+
+.login-brand p {
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+}
+
+.login-form .form-group {
+  margin-bottom: 16px;
+}
+
+.btn-block {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.menu-item-danger {
+  color: var(--color-danger);
+}

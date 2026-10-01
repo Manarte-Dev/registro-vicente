@@ -1,141 +1,155 @@
-const DB_NAME = 'RegistroIgreja';
-const DB_VERSION = 1;
-const STORE_NAME = 'members';
+import {
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  setDoc,
+  deleteDoc,
+} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js';
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
+import { db, storage } from './firebase.js';
 
-let dbPromise = null;
+const MEMBERS = 'members';
 
-function openDB() {
-  if (dbPromise) return dbPromise;
-
-  dbPromise = new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onupgradeneeded = (event) => {
-      const db = event.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
-        store.createIndex('name', 'name', { unique: false });
-        store.createIndex('createdAt', 'createdAt', { unique: false });
-      }
-    };
-
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-
-  return dbPromise;
+function membersCol() {
+  return collection(db, MEMBERS);
 }
 
-function runTransaction(mode, callback) {
-  return openDB().then(
-    (db) =>
-      new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, mode);
-        const store = tx.objectStore(STORE_NAME);
-        let result;
+function memberDoc(id) {
+  return doc(db, MEMBERS, String(id));
+}
 
-        try {
-          result = callback(store);
-        } catch (err) {
-          reject(err);
-          return;
-        }
+function photoPath(memberId) {
+  return `photos/${memberId}.jpg`;
+}
 
-        tx.oncomplete = () => {
-          Promise.resolve(result).then(resolve).catch(reject);
-        };
-        tx.onerror = () => reject(tx.error);
-      })
-  );
+function isDataUrl(value) {
+  return typeof value === 'string' && value.startsWith('data:');
+}
+
+async function dataUrlToBlob(dataUrl) {
+  const response = await fetch(dataUrl);
+  return response.blob();
+}
+
+async function uploadPhoto(memberId, dataUrl) {
+  const path = photoPath(memberId);
+  const blob = await dataUrlToBlob(dataUrl);
+  const storageRef = ref(storage, path);
+  await uploadBytes(storageRef, blob, { contentType: 'image/jpeg' });
+  return getDownloadURL(storageRef);
+}
+
+async function deletePhoto(memberId) {
+  try {
+    await deleteObject(ref(storage, photoPath(memberId)));
+  } catch {
+    // Foto pode não existir no Storage.
+  }
+}
+
+function mapDoc(snapshot) {
+  const data = snapshot.data();
+  return {
+    id: snapshot.id,
+    name: data.name || '',
+    phone: data.phone || '',
+    birthdate: data.birthdate || '',
+    parents: data.parents || '',
+    address: data.address || '',
+    custom: data.custom || '',
+    photo: data.photo || '',
+    createdAt: data.createdAt || '',
+  };
+}
+
+function memberFields(member) {
+  return {
+    name: member.name || '',
+    phone: member.phone || '',
+    birthdate: member.birthdate || '',
+    parents: member.parents || '',
+    address: member.address || '',
+    custom: member.custom || '',
+    photo: member.photo || '',
+    createdAt: member.createdAt || new Date().toISOString(),
+  };
 }
 
 export async function getAllMembers() {
-  return runTransaction('readonly', (store) => {
-    return new Promise((resolve, reject) => {
-      const request = store.getAll();
-      request.onsuccess = () => {
-        const members = request.result.sort((a, b) =>
-          a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' })
-        );
-        resolve(members);
-      };
-      request.onerror = () => reject(request.error);
-    });
-  });
+  const snapshot = await getDocs(membersCol());
+  const members = snapshot.docs.map(mapDoc);
+  return members.sort((a, b) =>
+    a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' })
+  );
 }
 
 export async function getMember(id) {
-  return runTransaction('readonly', (store) => {
-    return new Promise((resolve, reject) => {
-      const request = store.get(id);
-      request.onsuccess = () => resolve(request.result || null);
-      request.onerror = () => reject(request.error);
-    });
-  });
+  const snapshot = await getDoc(memberDoc(id));
+  if (!snapshot.exists()) return null;
+  return mapDoc(snapshot);
 }
 
 export async function addMember(member) {
-  return runTransaction('readwrite', (store) => {
-    return new Promise((resolve, reject) => {
-      const request = store.add(member);
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-  });
+  const docRef = doc(membersCol());
+  const id = docRef.id;
+  let photo = member.photo || '';
+
+  if (isDataUrl(photo)) {
+    photo = await uploadPhoto(id, photo);
+  }
+
+  await setDoc(docRef, memberFields({ ...member, photo }));
+  return id;
 }
 
 export async function updateMember(member) {
-  return runTransaction('readwrite', (store) => {
-    return new Promise((resolve, reject) => {
-      const request = store.put(member);
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error);
-    });
-  });
+  const id = String(member.id);
+  const existing = await getMember(id);
+  if (!existing) throw new Error('Membro não encontrado.');
+
+  let photo = member.photo || '';
+
+  if (isDataUrl(photo)) {
+    photo = await uploadPhoto(id, photo);
+  }
+
+  await setDoc(memberDoc(id), memberFields({ ...member, photo }), { merge: true });
+  return id;
 }
 
 export async function deleteMember(id) {
-  return runTransaction('readwrite', (store) => {
-    return new Promise((resolve, reject) => {
-      const request = store.delete(id);
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
-    });
-  });
+  await deletePhoto(String(id));
+  await deleteDoc(memberDoc(id));
 }
 
 export async function clearAllMembers() {
-  return runTransaction('readwrite', (store) => {
-    return new Promise((resolve, reject) => {
-      const request = store.clear();
-      request.onsuccess = () => resolve();
-      request.onerror = () => reject(request.error);
-    });
-  });
+  const snapshot = await getDocs(membersCol());
+  await Promise.all(
+    snapshot.docs.map(async (item) => {
+      await deletePhoto(item.id);
+      await deleteDoc(item.ref);
+    })
+  );
 }
 
 export async function bulkImportMembers(members) {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, 'readwrite');
-    const store = tx.objectStore(STORE_NAME);
+  for (const member of members) {
+    const docRef = doc(membersCol());
+    const id = docRef.id;
+    let photo = member.photo || '';
 
-    for (const member of members) {
-      store.put(member);
+    if (isDataUrl(photo)) {
+      photo = await uploadPhoto(id, photo);
     }
 
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-export function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
+    await setDoc(docRef, memberFields({ ...member, photo }));
+  }
 }
 
 export function compressImage(file, maxWidth = 800, quality = 0.8) {
