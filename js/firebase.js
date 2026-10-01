@@ -5,10 +5,10 @@ import { getAuth } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-aut
 
 /** Projeto Firebase: registro-igreja-1433a */
 const firebaseConfig = {
-  apiKey: 'AIzaSyCB1i1DOHdqz-R2FQasi3fABk1TLvmzQTc',
+  apiKey: 'AIzaSyCB1i1D0hDqz-R2fQAsi3fAbk1TLvmzQtC',
   authDomain: 'registro-igreja-1433a.firebaseapp.com',
   projectId: 'registro-igreja-1433a',
-  storageBucket: 'registro-igreja-1433a.appspot.com',
+  storageBucket: 'registro-igreja-1433a.firebasestorage.app',
   messagingSenderId: '1094930781004',
   appId: '1:1094930781004:web:4829b8e387cfba803735e9',
 };
