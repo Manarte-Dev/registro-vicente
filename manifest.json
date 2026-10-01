@@ -1,0 +1,19 @@
+{
+  "name": "Registro Igreja",
+  "short_name": "Registro",
+  "description": "Cadastro de membros da igreja com foto e dados pessoais",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f7fafc",
+  "theme_color": "#2c5282",
+  "orientation": "portrait",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

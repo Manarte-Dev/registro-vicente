@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#2c5282">
+  <meta name="description" content="Cadastro de membros da igreja com foto e dados pessoais">
+  <title>Registro Igreja</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+</head>
+<body>
+  <div id="app">
+    <!-- Tela: Lista -->
+    <section id="screen-list" class="screen active">
+      <header class="header">
+        <h1>Registro Igreja</h1>
+        <button type="button" id="btn-menu" class="btn-icon" aria-label="Menu">☰</button>
+      </header>
+
+      <div id="menu-panel" class="menu-panel hidden">
+        <button type="button" id="btn-export" class="menu-item">Exportar backup</button>
+        <button type="button" id="btn-import" class="menu-item">Importar backup</button>
+        <input type="file" id="input-import" accept=".json,application/json" hidden>
+      </div>
+
+      <div class="search-bar">
+        <input type="search" id="search-input" placeholder="Buscar por nome..." autocomplete="off">
+      </div>
+
+      <div id="members-list" class="members-list"></div>
+
+      <div id="empty-state" class="empty-state hidden">
+        <p>Nenhum membro cadastrado ainda.</p>
+        <p>Toque em <strong>Novo cadastro</strong> para começar.</p>
+      </div>
+
+      <button type="button" id="btn-new" class="fab" aria-label="Novo cadastro">+</button>
+    </section>
+
+    <!-- Tela: Cadastro / Edição -->
+    <section id="screen-form" class="screen">
+      <header class="header">
+        <button type="button" id="btn-back-form" class="btn-back" aria-label="Voltar">← Voltar</button>
+        <h1 id="form-title">Novo cadastro</h1>
+      </header>
+
+      <div class="form-panel">
+        <form id="member-form" class="member-form">
+          <label for="input-photo" class="btn-foto-label">
+            📷 Toque para carregar foto
+          </label>
+          <input type="file" id="input-photo" accept="image/*" capture="environment" hidden>
+          <p id="photo-error" class="field-error hidden">A foto é obrigatória.</p>
+
+          <div class="form-group">
+            <label for="input-name">Nome completo *</label>
+            <input type="text" id="input-name" required autocomplete="name" placeholder="Nome da pessoa">
+          </div>
+
+          <div class="form-group">
+            <label for="input-phone">Telefone / WhatsApp</label>
+            <input type="tel" id="input-phone" autocomplete="tel" placeholder="(00) 00000-0000" maxlength="15">
+          </div>
+
+          <div class="form-group">
+            <label for="input-birthdate">Data de nascimento</label>
+            <input type="date" id="input-birthdate">
+          </div>
+
+          <div class="form-group">
+            <label for="input-parents">Nome dos pais</label>
+            <input type="text" id="input-parents" placeholder="Nome do pai e/ou da mãe">
+          </div>
+
+          <div class="form-group">
+            <label for="input-address">Endereço</label>
+            <textarea id="input-address" rows="2" placeholder="Rua, número, bairro, cidade"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="input-custom">Observações / Função na igreja</label>
+            <textarea id="input-custom" rows="2" placeholder="Ex.: Diácono, louvor, observações..."></textarea>
+          </div>
+        </form>
+
+        <div class="ficha-section">
+          <p class="ficha-section-label">Pré-visualização da ficha</p>
+          <div class="ficha" id="ficha">
+            <img data-field="foto" class="ficha-foto" src="" alt="Foto do membro" hidden>
+            <h2 class="ficha-titulo">Ficha de Membro</h2>
+            <img data-field="logo" class="ficha-logo" src="icon-192.png" alt="Logo da igreja">
+            <div class="ficha-campos">
+              <div data-field="nome" class="ficha-campo">NOME COMPLETO:</div>
+              <div data-field="nascimento" class="ficha-campo">DATA DE NASCIMENTO:</div>
+              <div data-field="pais" class="ficha-campo ficha-campo-largo">NOME DOS PAIS:</div>
+              <div data-field="telefone" class="ficha-campo">TELEFONE / WHATSAPP:</div>
+              <div data-field="endereco" class="ficha-campo ficha-campo-largo">ENDEREÇO:</div>
+              <div data-field="custom" class="ficha-campo ficha-campo-largo">FUNÇÃO / OBSERVAÇÕES:</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="ficha-loading" class="ficha-loading hidden" role="status">⏳ Gerando download...</div>
+
+        <div class="form-actions">
+          <button type="button" id="btn-download-form" class="btn btn-secondary">Baixar ficha</button>
+          <button type="button" id="btn-clear-form" class="btn btn-outline">Limpar</button>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" id="btn-cancel-form" class="btn btn-outline">Cancelar</button>
+          <button type="submit" form="member-form" class="btn btn-primary">Salvar</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tela: Detalhe -->
+    <section id="screen-detail" class="screen">
+      <header class="header">
+        <button type="button" id="btn-back-detail" class="btn-back" aria-label="Voltar">← Voltar</button>
+        <h1>Detalhes</h1>
+      </header>
+
+      <div class="detail-content">
+        <div class="ficha-section">
+          <div class="ficha" id="ficha-detail">
+            <img data-field="foto" class="ficha-foto" src="" alt="Foto do membro" hidden>
+            <h2 class="ficha-titulo">Ficha de Membro</h2>
+            <img data-field="logo" class="ficha-logo" src="icon-192.png" alt="Logo da igreja">
+            <div class="ficha-campos">
+              <div data-field="nome" class="ficha-campo">NOME COMPLETO:</div>
+              <div data-field="nascimento" class="ficha-campo">DATA DE NASCIMENTO:</div>
+              <div data-field="pais" class="ficha-campo ficha-campo-largo">NOME DOS PAIS:</div>
+              <div data-field="telefone" class="ficha-campo">TELEFONE / WHATSAPP:</div>
+              <div data-field="endereco" class="ficha-campo ficha-campo-largo">ENDEREÇO:</div>
+              <div data-field="custom" class="ficha-campo ficha-campo-largo">FUNÇÃO / OBSERVAÇÕES:</div>
+            </div>
+          </div>
+        </div>
+
+        <p class="detail-meta">
+          Cadastrado em: <span id="detail-created">—</span>
+        </p>
+
+        <div id="ficha-loading-detail" class="ficha-loading hidden" role="status">⏳ Gerando download...</div>
+
+        <div class="detail-actions">
+          <button type="button" id="btn-download-detail" class="btn btn-secondary">Baixar ficha</button>
+          <button type="button" id="btn-edit" class="btn btn-primary">Editar</button>
+          <button type="button" id="btn-delete" class="btn btn-danger">Excluir</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="exportArea" class="export-area" aria-hidden="true"></div>
+  <div id="toast" class="toast hidden" role="status"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
