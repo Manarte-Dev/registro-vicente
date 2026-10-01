@@ -3,6 +3,7 @@ import { getFirestore } from 'https://www.gstatic.com/firebasejs/10.14.1/firebas
 import { getStorage } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js';
 import { getAuth } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 
+/** Projeto Firebase: registro-igreja-1433a */
 const firebaseConfig = {
   apiKey: 'AIzaSyCB1i1DOHdqz-R2FQasi3fABk1TLvmzQTc',
   authDomain: 'registro-igreja-1433a.firebaseapp.com',
