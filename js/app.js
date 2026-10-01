@@ -5,6 +5,7 @@ import {
   updateMember,
   deleteMember,
   compressImage,
+  dbErrorMessage,
 } from './db.js';
 import { login, logout, watchAuth, authErrorMessage } from './auth.js';
 import { exportBackup, importBackup } from './export.js';
@@ -301,8 +302,12 @@ async function handleFormSubmit(event) {
 
     await loadMembers();
     showScreen('list');
-  } catch {
-    showToast('Erro ao salvar. Tente novamente.');
+  } catch (err) {
+    showToast(
+      dbErrorMessage(err.code) ||
+        err.message ||
+        'Erro ao salvar. Verifique se o Firestore está ativo no Firebase Console.'
+    );
   }
 }
 
