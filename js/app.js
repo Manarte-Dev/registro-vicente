@@ -8,7 +8,6 @@ import {
   dbErrorMessage,
 } from './db.js';
 import { login, logout, watchAuth, authErrorMessage } from './auth.js';
-import { exportBackup, importBackup } from './export.js';
 import {
   updateFichaFromInputs,
   populateFicha,
@@ -408,45 +407,6 @@ loginForm.addEventListener('submit', async (event) => {
     btnLogin.disabled = false;
     btnLogin.textContent = 'Entrar';
   }
-});
-
-document.getElementById('btn-export').addEventListener('click', async () => {
-  menuPanel.classList.add('hidden');
-  try {
-    const count = await exportBackup();
-    showToast(`Backup exportado (${count} cadastro${count !== 1 ? 's' : ''}).`);
-  } catch {
-    showToast('Erro ao exportar backup.');
-  }
-});
-
-const inputImport = document.getElementById('input-import');
-document.getElementById('btn-import').addEventListener('click', () => {
-  menuPanel.classList.add('hidden');
-  inputImport.click();
-});
-
-inputImport.addEventListener('change', async (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const confirmed = confirm(
-    'Importar backup vai substituir todos os cadastros atuais. Deseja continuar?'
-  );
-  if (!confirmed) {
-    inputImport.value = '';
-    return;
-  }
-
-  try {
-    const count = await importBackup(file);
-    await loadMembers();
-    showToast(`Backup importado (${count} cadastro${count !== 1 ? 's' : ''}).`);
-  } catch (err) {
-    showToast(err.message || 'Erro ao importar backup.');
-  }
-
-  inputImport.value = '';
 });
 
 searchInput.addEventListener('input', (e) => renderList(e.target.value));
