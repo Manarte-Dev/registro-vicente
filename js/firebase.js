@@ -5,7 +5,7 @@ import { getAuth } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-aut
 
 /** Projeto Firebase: registro-igreja-1433a */
 const firebaseConfig = {
-  apiKey: 'AIzaSyCB1i1D0hDqz-R2fQAsi3fAbk1TLvmzQtC',
+  apiKey: 'AIzaSyCB1i1DOhDqz-R2fQAsi3fABk1TLvmzQTc',
   authDomain: 'registro-igreja-1433a.firebaseapp.com',
   projectId: 'registro-igreja-1433a',
   storageBucket: 'registro-igreja-1433a.firebasestorage.app',
